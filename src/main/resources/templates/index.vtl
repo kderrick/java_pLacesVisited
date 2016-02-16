@@ -1,0 +1,19 @@
+<ul>
+#foreach ($place in $placeVisited)
+  <li>$place.getBoth()</li>
+#end
+</ul>
+
+<h1>Places Visited!</h1>
+
+<p>Add a new location:</p>
+
+<form action="/places" method="post">
+  <label for="place">Place Visited</label>
+  <input id="place" name="place" type="text">
+
+  <label for="date">Date Visited</label>
+  <input id="date" name="date" type="text">
+
+  <button type="submit" class="btn btn-default">Add place</button>
+</form>

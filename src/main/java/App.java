@@ -1,45 +1,40 @@
 import java.util.HashMap;
-
+import java.util.ArrayList;
 import spark.ModelAndView;
 import spark.template.velocity.VelocityTemplateEngine;
 import static spark.Spark.*;
 
 public class App {
     public static void main(String[] args) {
+      staticFileLocation("/public");
+      String layout = "templates/layout.vtl";
+      get("/", (request, response) -> {
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("template", "templates/index.vtl");
+        model.put("placeVisited", request.session().attribute("places"));
+        return new ModelAndView(model, layout);
+    }, new VelocityTemplateEngine());
 
-        ProcessBuilder process = new ProcessBuilder();
-        Integer port;
-        if (process.environment().get("PORT") != null) {
-            port = Integer.parseInt(process.environment().get("PORT"));
-        } else {
-            port = 4567;
+    post("/places", (request, response) -> {
+      HashMap<String, Object> model = new HashMap<String, Object>();
+
+      ArrayList<PlacesVisited> placeVisited = request.session().attribute("places");
+        if (placeVisited == null) {
+          placeVisited = new ArrayList<PlacesVisited>();
+          request.session().attribute("places", placeVisited);
         }
 
-        setPort(port);
+      String place = request.queryParams("place");
+      String date = request.queryParams("date");
+      PlacesVisited newPlacesVisited = new PlacesVisited(place, date);
+      // request.session().attribute("place", newPlacesVisited);
+      // request.session().attribute("date", newPlacesVisited);
 
-        staticFileLocation("/public");
-        String layout = "templates/layout.vtl";
+      placeVisited.add(newPlacesVisited);
 
-        //RESTful ARCHITECTURE
-        //Use POST to create something on the server
-        //Use GET to retrieve something from the server
-        //Use PUT to change or update something on the server
-        //Use DELETE to remove or delete something on the server
-        //Keep URLs intuitive
-        //Each request from client contains all info necessary for that request
-
-        //ROUTES: Home Page
-
-        // get("/", (request, response) -> {
-        //     HashMap<String, Object> model = new HashMap<String, Object>();
-
-        //     model.put("template", "templates/index.vtl");
-        //     return new ModelAndView(model, layout);
-        // }, new VelocityTemplateEngine());
-
-        //ROUTES: Identification of Resources
-
-        //ROUTES: Changing Resources
+      model.put("template", "templates/success.vtl");
+      return new ModelAndView(model, layout);
+    }, new VelocityTemplateEngine());
 
     }
 }
